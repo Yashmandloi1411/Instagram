@@ -76,14 +76,22 @@ async function registerController(req, res) {
 
 async function loginController(req, res) {
   // user requ for new token
+  // isma email ko aga likho nhi to ya error dega if frontend vala try karega
 
-  const { username, email, password } = req.body;
+  // const { username, email, password } = req.body;
+  // const user = await userModel.findOne({
+  //   // $or: [{ username: username }, { email: email }],
+  //   $or: [{ email: email }, { username: username }],
+  // });
+
+  const { identifier, password } = req.body;
+
   const user = await userModel.findOne({
-    $or: [{ username: username }, { email: email }],
+    $or: [{ email: identifier }, { username: identifier }],
   });
   if (!user) {
     return res.status(404).json({
-      message: "Email is Not founde Kindly register",
+      message: "Email is Not found Kindly register",
     });
   }
 
