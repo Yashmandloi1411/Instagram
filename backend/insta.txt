@@ -1,0 +1,7 @@
+// post creation
+{
+    caption: string,
+    img_url:string
+    user:user_id
+    created_at: date-time
+}
