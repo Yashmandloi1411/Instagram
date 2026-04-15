@@ -86,9 +86,11 @@ async function loginController(req, res) {
 
   const { identifier, password } = req.body;
 
-  const user = await userModel.findOne({
-    $or: [{ email: identifier }, { username: identifier }],
-  });
+  const user = await userModel
+    .findOne({
+      $or: [{ email: identifier }, { username: identifier }],
+    })
+    .select("+password");
   if (!user) {
     return res.status(404).json({
       message: "Email is Not found Kindly register",
@@ -132,7 +134,24 @@ async function loginController(req, res) {
   });
 }
 
+async function getMeController(req, res) {
+  const userId = req.user.user;
+  const user = await userModel.findById(userId);
+
+  return res.status(200).json({
+    user: {
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      profileImage: user.profile_Image,
+    },
+
+    message: "Successfully get user details",
+  });
+}
+
 module.exports = {
   registerController,
   loginController,
+  getMeController,
 };

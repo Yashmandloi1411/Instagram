@@ -74,7 +74,57 @@ async function unfollowUserController(req, res) {
   });
 }
 
+// get followeer jisna follow kiya muja
+
+async function getFollowerController(req, res) {
+  const username = req.params.username;
+
+  const followers = await followModel.find({
+    followee: username,
+  });
+
+  // user details fetch karo
+  const users = await Promise.all(
+    followers.map(async (f) => {
+      return await userModel.findOne(
+        { username: f.follower },
+        { username: 1, profile_Image: 1 },
+      );
+    }),
+  );
+
+  return res.json({
+    count: followers.length,
+    followers: users,
+  });
+}
+
+// jisko mena follow kiya
+async function getFollowingListController(req, res) {
+  const username = req.params.username;
+
+  const following = await followModel.find({
+    follower: username,
+  });
+
+  const users = await Promise.all(
+    following.map(async (f) => {
+      return await userModel.findOne(
+        { username: f.followee },
+        { username: 1, profile_Image: 1 },
+      );
+    }),
+  );
+
+  return res.status(200).json({
+    count: following.length,
+    following: users,
+  });
+}
+
 module.exports = {
   followUserController,
   unfollowUserController,
+  getFollowerController,
+  getFollowingListController,
 };

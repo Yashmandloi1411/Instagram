@@ -45,9 +45,15 @@ postRouter.post(
 // @description dislike a post with the id provided in the req params
 
 postRouter.post(
-  "/dislike/:postId",
+  "/unlike/:postId",
   identifyUser,
-  postController.dislikePostController,
+  postController.UnlikePostController,
 );
+
+/*
+   @description get all posts
+  
+*/
+postRouter.get("/feeds", identifyUser, postController.getAllFeedController);
 
 module.exports = postRouter;

@@ -43,7 +43,7 @@ async function createPostController(req, res) {
     caption: req.body.caption,
     imgUrl: uploadResponse.url,
     // user: decode.user,
-    user: req.user.id,
+    user: req.user.user,
   });
 
   res.status(201).json({
@@ -125,7 +125,7 @@ async function getPostDetailsController(req, res) {
 async function likePostController(req, res) {
   // kon se user like kar rha h
   //const username = req.user.username;
-  const userId = req.user.user;
+  const username = req.user.username;
 
   //kon si post like kar rha ha
   const postId = req.params.postId;
@@ -142,7 +142,7 @@ async function likePostController(req, res) {
   // like karna ka liya like model ki need rhagi
   const like = await likemodel.create({
     post: postId,
-    user: userId,
+    user: username,
   });
 
   return res.status(200).json({
@@ -151,12 +151,57 @@ async function likePostController(req, res) {
   });
 }
 
-async function dislikePostController(req, res) {}
+async function UnlikePostController(req, res) {
+  const username = req.user.username;
+  //kon si post like kar rha ha
+  const postId = req.params.postId;
+
+  // ya find karage ki post like be ha ya nhi
+  const isliked = await likemodel.findOne({
+    post: postId,
+    user: username,
+  });
+
+  if (!isliked) {
+    return res.status(400).json({
+      message: "user profile is already not liked",
+    });
+  }
+  await likemodel.findOneAndDelete({ _id: isliked._id });
+
+  return res.status(200).json({
+    message: "post unlike successfully",
+  });
+}
+
+async function getAllFeedController(req, res) {
+  const username = req.user.username;
+
+  const posts = await Promise.all(
+    (
+      await postModel.find().populate("user").sort({ createdAt: -1 }).lean()
+    ).map(async (post) => {
+      const isLiked = await likemodel.findOne({
+        user: username,
+        post: post._id,
+      });
+
+      post.isLiked = Boolean(isLiked); // ✅ true/false add karo
+      return post; // ✅ pura post return karo
+    }),
+  );
+
+  return res.status(200).json({
+    message: "successfully fetch all feed",
+    posts,
+  });
+}
 
 module.exports = {
   createPostController,
   getAllPostController,
   getPostDetailsController,
   likePostController,
-  dislikePostController,
+  getAllFeedController,
+  UnlikePostController,
 };
