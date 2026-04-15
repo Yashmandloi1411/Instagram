@@ -1,29 +1,26 @@
 import React, { useState } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import axios from "axios";
-
+import useAuth from "../hooks/useAuth";
 function Register() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
   const [password, setUserPassword] = useState("");
 
+  const { handleRegister, loading } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await axios.post(
-      "http://localhost:3000/api/auth/register",
-      {
-        username,
-        password,
-        email,
-      },
-      { withCredentials: true },
-    );
-
-    console.log("res of register", res);
+    handleRegister(username, email, password);
+    navigate("/feed");
   };
+  if (loading) {
+    return <h1>loading....</h1>;
+  }
   return (
     <main>
       <div className="form-container">
